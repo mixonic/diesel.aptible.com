@@ -6,74 +6,74 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-  this.route("organizations", {}, function() {
-    this.route("show", {
-      path: ":organization_id"
-    }, function() {
 
-      this.route("app", {
-        path: "apps/:app_id",
+  this.route('index');
+
+  this.route('authenticated', {path:''}, function(){
+    this.route("app", {
+      path: "apps/:app_id",
+      resetNamespace: true
+    }, function() {
+      this.route("services");
+      this.route("vhosts", {}, function(){
+        this.route('new');
+        this.route('edit', {
+          path: ':vhost_id/edit'
+        });
+      });
+      this.route("activity");
+      this.route("deprovision");
+    });
+
+    this.route("database", {
+      path: "databases/:app_id",
+      resetNamespace: true
+    }, function() {});
+
+    this.route("stacks", {
+      resetNamespace: true
+    }, function(){
+      this.route("stack", {
+        path: ":stack_id",
         resetNamespace: true
       }, function() {
-        this.route("services");
-        this.route("vhosts", {}, function(){
-          this.route('new');
-          this.route('edit', {
-            path: ':vhost_id/edit'
-          });
+        this.route("log-drains", {
+          path: 'logging'
+        }, function(){
+          this.route("new");
         });
-        this.route("activity");
-        this.route("deprovision");
-      });
 
-      this.route("database", {
-        path: "databases/:app_id",
-        resetNamespace: true
-      }, function() {});
-
-      this.route("stacks", {
-        resetNamespace: true
-      }, function(){
-        this.route("stack", {
-          path: ":stack_id",
+        this.route("apps", {
           resetNamespace: true
         }, function() {
-          this.route("log-drains", {
-            path: 'logging'
-          }, function(){
-            this.route("new");
-          });
-
-          this.route("apps", {
-            resetNamespace: true
-          }, function() {
-            this.route("new");
-          });
-
-          this.route("databases", {
-            resetNamespace: true
-          }, function() {
-            this.route("new");
-          });
-
-          this.route("settings");
+          this.route("new");
         });
+
+        this.route("databases", {
+          resetNamespace: true
+        }, function() {
+          this.route("new");
+        });
+
+        this.route("settings");
       });
     });
-  });
 
-  this.route("login");
-  this.route("logout");
-  this.route("signup");
-
-  this.route("verify", {
-    path: "verify/:verification_code"
+    this.route("verify", {
+      path: "verify/:verification_code",
+      resetNamespace: true
+    });
   });
 
   this.route("welcome", function() {
     this.route("first-app");
     this.route("payment-info");
   });
+
+
+  this.route("login");
+  this.route("logout");
+  this.route("signup");
 });
 
 export default Router;
