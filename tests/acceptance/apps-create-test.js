@@ -84,7 +84,7 @@ test('visit /stacks/1/apps/new and create an app', function(){
 
   signInAndVisit('/stacks/1/apps/new');
   fillIn('input.app-handle', 'my-new-app');
-  click(':contains(Create app)');
+  click(':contains(Save App)');
 
   andThen(function(){
     equal(currentPath(), 'stacks.stack.apps.index');
