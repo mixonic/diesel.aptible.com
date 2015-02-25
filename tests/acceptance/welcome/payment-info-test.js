@@ -12,9 +12,14 @@ function visitPaymentInfoWithApp(options, userData){
     if (options.dbType) {
       click(`.${options.dbType} a`);
     }
+    if (options.dbInitialDiskSize) {
+      andThen(function(){
+        Ember.$('.slider').trigger('slide', options.dbInitialDiskSize);
+      });
+    }
     for (var prop in options){
       let dasherized = prop.dasherize();
-      if (dasherized === 'db-type') {
+      if (dasherized === 'db-type' || dasherized === 'db-initial-disk-size') {
         continue;
       }
       fillIn(`input[name="${dasherized}"]`, options[prop]);
@@ -270,7 +275,7 @@ test('submitting valid payment info should be successful and create app', functi
 });
 
 test('submitting valid payment info should be successful and create db', function() {
-  expect(10);
+  expect(11);
   // This is to load apps.index
   stubStacks();
   stubOrganization();
@@ -282,6 +287,7 @@ test('submitting valid payment info should be successful and create db', functio
   var addressZip = '11111';
   var stripeToken = 'some-token';
   var stackHandle = 'sprocket-co';
+  var initialDiskSize = '67';
   var dbHandle = 'my-db-1';
   var dbType = 'redis';
 
@@ -303,6 +309,7 @@ test('submitting valid payment info should be successful and create db', functio
   stubRequest('post', `/accounts/${stackHandle}-dev/databases`, function(request){
     var params = this.json(request);
     equal(params.handle, dbHandle, 'db handle is correct');
+    equal(params.initial_disk_size, initialDiskSize, 'disk size is correct');
     equal(params.type, dbType, 'db type is correct');
     return this.success();
   });
@@ -323,7 +330,8 @@ test('submitting valid payment info should be successful and create db', functio
 
   visitPaymentInfoWithApp({
     dbHandle: dbHandle,
-    dbType: dbType
+    dbType: dbType,
+    dbInitialDiskSize: initialDiskSize
   });
   fillIn('[name=name]', name);
   fillIn('[name=number]', cardNumber);
