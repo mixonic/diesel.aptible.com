@@ -1,0 +1,11 @@
+{{model.name}}
+{{model.email}}
+
+{{#each organization.roles as |role|}}
+<div class="role">
+  Role {{role.name}}
+  {{input checked=(user-has-role model role)
+          name='user-role'
+          type='checkbox'}}
+</div>
+{{/each}}

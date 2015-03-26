@@ -70,7 +70,7 @@ test(`visiting ${url} and clicking cancel`, function(assert) {
   clickButton('Cancel');
 
   andThen(() => {
-    assert.equal(currentPath(), 'organization.members');
+    assert.equal(currentPath(), 'organization.members.index');
   });
 });
 
