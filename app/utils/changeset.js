@@ -10,20 +10,18 @@ var StagedObject = Ember.Object.extend(Ember.Evented, {
   },
 
   value() {
-    if (this._currentValue === undefined) {
-      this._currentValue = this.initialValue();
-    }
     return this._currentValue;
   },
 
   setValue(value) {
     this._currentValue = value;
     this.trigger('didChange');
+    this.changeset.trigger('didChangeStagedObject', this.keyData);
   }
 
 });
 
-export default Ember.Object.extend({
+export default Ember.Object.extend(Ember.Evented, {
 
   init() {
     this._stagedObjects = Ember.create(null);
@@ -48,11 +46,15 @@ export default Ember.Object.extend({
 
   value(keyData) {
     let stagedObject = this._lookupStagedObject(keyData);
+    const value = stagedObject.value();
+    if (value === undefined) {
+      stagedObject.setValue(stagedObject.initialValue());
+    }
     return stagedObject.value();
   },
 
   setValue(keyData, value) {
-    let stagedObject = this._lookupStagedObject(keyData);
+    let stagedObject = this._lookupStagedObject(keyData, value);
     return stagedObject.setValue(value);
   },
 
@@ -61,19 +63,15 @@ export default Ember.Object.extend({
     stagedObject.on('didChange', callback);
   },
 
+  subscribeAll(callback) {
+    this.on('didChangeStagedObject', callback);
+  },
+
   forEachValue(callback) {
     const keys = Ember.keys(this._stagedObjects);
     keys.forEach((key) => {
       let stagedObject = this._stagedObjects[key];
       callback(stagedObject.keyData, stagedObject.initialValue(), stagedObject.value());
-    });
-  },
-
-  forEachChangedValue(callback) {
-    this.forEachValue((keyData, initialValue, value) => {
-      if (initialValue !== value) {
-        callback(keyData, initialValue, value);
-      }
     });
   }
 });
