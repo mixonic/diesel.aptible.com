@@ -31,20 +31,28 @@ export default Ember.Route.extend({
     save() {
       const promises = [];
       const changeset = this.controller.get('changeset');
+      let promise;
 
-      changeset.forEachValue((keyData, initialValue, value) => {
-        if (initialValue === value) {
-          return;
-        }
+      changeset.forEachChangedValue((keyData, initialValue, value) => {
+        let user = this.currentModel;
+        let userLink = user.get('data.links.self');
+        let role     = keyData.organizationRole;
 
         if (value) {
-          promises.push(this.store.createRecord('membership', {
-            user: this.currentModel.get('data.links.self'),
-            role: keyData.organizationRole
-          }).save());
+          promise = this.store.createRecord('membership', {
+            user: userLink, role
+          }).save();
         } else {
-          //crazy stuff
+          promise = role.get('memberships').then((memberships) => {
+            let userMembership = memberships.findBy('data.links.user', userLink);
+            Ember.assert(`A user membership could not be found for user id "${user.get('id')}"
+                          and role name ${role.get('name')}`,
+                         !!userMembership);
+            return userMembership.destroyRecord();
+          });
         }
+
+        promises.push(promise);
       });
 
       Ember.RSVP.all(promises).then(() => {
