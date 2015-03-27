@@ -144,3 +144,28 @@ test('forEachValue returns values that are read but not set', (assert) => {
     assert.equal(_keyData, keyData, 'forEachValue yields for the keyData that was read');
   });
 });
+
+test('forEachChangedValue skips values that did not change', (assert) => {
+  changeset = Changeset.create({
+    key(keyData){
+      return keyData.key;
+    },
+    initialValue(keyData){
+      return keyData.value;
+    }
+  });
+
+  let changedKeyData = [];
+  let keyData1 = {key:'1', value:'foo'};
+  let keyData2 = {key:'2', value:'bar'};
+  let keyData3 = {key:'3', value:'baz'};
+
+  changeset.setValue(keyData1, 'first thing');
+  changeset.setValue(keyData3, 'third thing');
+
+  changeset.forEachChangedValue((_keyData, initialValue, value) => {
+    changedKeyData.push(_keyData);
+  });
+
+  assert.deepEqual(changedKeyData, [keyData1, keyData3]);
+});

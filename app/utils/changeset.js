@@ -67,6 +67,13 @@ export default Ember.Object.extend({
       let stagedObject = this._stagedObjects[key];
       callback(stagedObject.keyData, stagedObject.initialValue(), stagedObject.value());
     });
-  }
+  },
 
+  forEachChangedValue(callback) {
+    this.forEachValue((keyData, initialValue, value) => {
+      if (initialValue !== value) {
+        callback(keyData, initialValue, value);
+      }
+    });
+  }
 });
