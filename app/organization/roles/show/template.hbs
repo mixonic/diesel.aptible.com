@@ -98,20 +98,25 @@
         <button {{action "inviteEmail" invitedEmail}}>Invite</button>
       </div>
 
-      {{#each organization.users as |user|}}
-        <div class="form-group">
-          <label>{{user.name}}</label>
-          <button {{action "removeUser" user}}>Remove</button>
-        </div>
-      {{/each}}
+      <div class="role-members">
+        {{!FIXME this should be the role's users, not the organization's users }}
+        {{#each organization.users as |user|}}
+          <div class="form-group">
+            <label>{{user.name}}</label>
+            <button {{action "removeUser" user}}>Remove</button>
+          </div>
+        {{/each}}
+      </div>
 
-      {{#each organization.invitations as |invitation|}}
-        <div class="form-group">
-          <label>{{invitation.email}}</label>
-          <button {{action "resendInvite" invitation}}>Resend Invitation</button>
-          <button {{action "removeInvite" invitation}}>Remove</button>
-        </div>
-      {{/each}}
+      <div class="role-invitations">
+        {{#each model.invitations as |invitation|}}
+          <div class="form-group">
+            <label>{{invitation.email}}</label>
+            <button {{action "resendInvitation" invitation}}>Resend Invitation</button>
+            <button {{action "removeInvitation" invitation}}>Remove</button>
+          </div>
+        {{/each}}
+      </div>
     </form>
   </div>
 </div>

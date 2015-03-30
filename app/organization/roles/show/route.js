@@ -10,7 +10,7 @@ export default Ember.Route.extend({
   model(params) {
     return this.store.find('role', params.role_id);
   },
-  afterModel() {
+  afterModel(model) {
     this._organization = this.modelFor('organization');
     const organizationUrl = this._organization.get('data.links.self');
 
@@ -26,10 +26,11 @@ export default Ember.Route.extend({
       this._stacks = stacks;
     }));
 
-    // Ensure the organization has users and invites before
-    // the route is entered.
+    // Ensure the organization has users before entering route
     promises.push(this._organization.get('users'));
-    promises.push(this._organization.get('invitations'));
+
+    // load role invitations before entering route
+    promises.push(model.get('invitations'));
 
     return Ember.RSVP.all(promises);
   },
@@ -64,6 +65,27 @@ export default Ember.Route.extend({
     controller.observeChangeset();
   },
   actions: {
+    removeUser(user){
+      let role = this.currentModel;
+      let userLink = user.get('data.links.self');
+
+      role.get('memberships').then((memberships) => {
+        let membership = memberships.findBy('data.links.user', userLink);
+        return membership.destroyRecord();
+      });
+    },
+    removeInvitation(invitation){
+      invitation.destroyRecord();
+    },
+    resendInvitation(invitation){
+      let reset = this.store.createRecord('reset');
+      reset.setProperties({
+        type: 'invitation',
+        invitationId: invitation.get('id')
+      });
+      reset.save();
+    },
+
     save() {
 
       const savePromises = [];

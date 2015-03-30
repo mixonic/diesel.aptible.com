@@ -12,7 +12,8 @@ Ember.Test.registerAsyncHelper('signIn', function(app, userData, roleData){
     verified: true,
     links: {
       sshKeys: '/users/user1/ssh_keys',
-      roles:  '/users/user1/roles'
+      roles:  '/users/user1/roles',
+      self: '/users/user1'
     }
   };
 
