@@ -52,6 +52,7 @@ export default Ember.Route.extend({
       }
     });
     controller.set('changeset', changeset);
+    controller.observeChangeset();
   },
   actions: {
     save() {
@@ -65,10 +66,9 @@ export default Ember.Route.extend({
         let promise;
         if (value.isEnabled) {
           promise = this.store.createRecord('permission', {
-            role:  keyData.role,
+            role:  keyData.role.get('data.links.self'),
             scope: keyData.scope,
-            stack: keyData.stack,
-            roleUrl: keyData.role.get('data.links.self')
+            stack: keyData.stack
           }).save();
         } else {
           promise = value.permission.destroyRecord();
@@ -76,6 +76,10 @@ export default Ember.Route.extend({
 
         savePromises.push(promise);
       });
+
+      if (this.currentModel.get('isDirty')) {
+        savePromises.push(this.currentModel.save());
+      }
 
       return Ember.RSVP.all(savePromises).then(() => {
         this.transitionTo('organization.roles');

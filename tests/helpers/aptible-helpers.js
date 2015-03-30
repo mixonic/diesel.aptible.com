@@ -3,7 +3,7 @@ import { locationHistory } from '../../utils/location';
 import { titleHistory } from '../../utils/title-route-extensions';
 import { stubRequest } from "./fake-server";
 
-Ember.Test.registerAsyncHelper('signIn', function(app, userData){
+Ember.Test.registerAsyncHelper('signIn', function(app, userData, roleData){
   userData = userData || {};
   let defaultUserData = {
     id: 'user1',
@@ -16,24 +16,28 @@ Ember.Test.registerAsyncHelper('signIn', function(app, userData){
     }
   };
 
+  roleData = roleData || {};
+  const defaultRoleData = {
+    id: 'r1',
+    privileged: true,
+    _links: {
+      self: { href: `/roles/r1` },
+      organization: { href: '/organizations/o1' }
+    }
+  };
+
   // FIXME this makes the tests slower. If we push the role data directly
   // into the store we'll save this roundtrip during tests
   stubRequest('get', '/users/user1/roles', function(request){
     return this.success({
       _embedded: {
-        roles: [{
-          id: 'r1',
-          privileged: true,
-          _links: {
-            self: { href: `/roles/r1` },
-            organization: { href: '/organizations/o1' }
-          }
-        }]
+        roles: [roleData]
       }
     });
   });
 
   userData = Ember.$.extend(true, defaultUserData, userData);
+  roleData = Ember.$.extend(true, defaultRoleData, roleData);
 
   let session = app.__container__.lookup('torii:session');
   let sm = session.get('stateMachine');
