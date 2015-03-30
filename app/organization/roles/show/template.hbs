@@ -1,3 +1,5 @@
+<h1>{{organization.name}} Roles: {{model.name}}</h1>
+
 <div class="panel">
   <div class="panel-heading">
     <h3>Settings</h3>
@@ -83,5 +85,33 @@
   </div>
 
   <div class="panel-body">
+    <form role='form'>
+      <div class="form-group">
+        <label>Add member</label>
+        {{user-select users=organization.users selected=invitedUser}}
+        <button {{action "inviteUser" invitedUser}}>Add</button>
+      </div>
+
+      <div class="form-group">
+        <label>Invite by email</label>
+        {{input value=invitedEmail}}
+        <button {{action "inviteEmail" invitedEmail}}>Invite</button>
+      </div>
+
+      {{#each organization.users as |user|}}
+        <div class="form-group">
+          <label>{{user.name}}</label>
+          <button {{action "removeUser" user}}>Remove</button>
+        </div>
+      {{/each}}
+
+      {{#each organization.invitations as |invitation|}}
+        <div class="form-group">
+          <label>{{invitation.email}}</label>
+          <button {{action "resendInvite" invitation}}>Resend Invitation</button>
+          <button {{action "removeInvite" invitation}}>Remove</button>
+        </div>
+      {{/each}}
+    </form>
   </div>
 </div>

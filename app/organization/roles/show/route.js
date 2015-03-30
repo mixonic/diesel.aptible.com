@@ -14,15 +14,24 @@ export default Ember.Route.extend({
     this._organization = this.modelFor('organization');
     const organizationUrl = this._organization.get('data.links.self');
 
+    const promises = [];
+
     // Find only the stacks that belong to the
     // current organization
-    return this.store.find('stack').then(() => {
+    promises.push(this.store.find('stack').then(() => {
       return this.store.filter('stack', (stack) => {
         return stack.get('data.links.organization') === organizationUrl;
       });
     }).then((stacks) => {
       this._stacks = stacks;
-    });
+    }));
+
+    // Ensure the organization has users and invites before
+    // the route is entered.
+    promises.push(this._organization.get('users'));
+    promises.push(this._organization.get('invitations'));
+
+    return Ember.RSVP.all(promises);
   },
   setupController(controller, model) {
     controller.set('model', model);
