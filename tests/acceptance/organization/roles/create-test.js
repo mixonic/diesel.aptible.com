@@ -75,7 +75,7 @@ test(`visiting ${url} and creating new role without permissions`, (assert) => {
 
   const roleName = roleData.name;
 
-  stubRequest('post', `/roles`, function(request){
+  stubRequest('post', `/organizations/${orgId}/roles`, function(request){
     assert.ok(true, 'posts to /roles');
     let json = this.json(request);
     assert.equal(json.name, roleName, 'has role name');
@@ -99,7 +99,7 @@ test(`visiting ${url} and creating new role with permissions`, (assert) => {
   assert.expect(4);
 
   // tested in previous test
-  stubRequest('post', `/roles`, function(request){
+  stubRequest('post', `/organizations/${orgId}/roles`, function(request){
     return this.success(roleData);
   });
 
