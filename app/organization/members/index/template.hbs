@@ -40,7 +40,7 @@
             {{/aptible-ability}}
           </td>
           <td>{{user.email}}</td>
-          <td>{{format-list user.roles 'name' ', '}}</td>
+          <td>{{format-list (filter-by-organization user.roles organization) 'name' ', '}}</td>
           <td>
             {{#aptible-ability
                 user=session.currentUser
