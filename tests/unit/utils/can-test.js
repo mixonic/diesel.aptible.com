@@ -25,7 +25,7 @@ test('user and stack have same role, stack\'s permission has "manage" scope', fu
   var user, userRole, stack, stackPermission;
 
   Ember.run(function(){
-    user     = store.push('user', {id:'u1', roles:['r1']});
+    user     = store.push('user', {id:'u1', roles:['r1'], verified: true});
     userRole = store.push('role', {id:'r1'});
 
     stack    = store.push('stack', {id:'s1', permissions:['p1']});
@@ -53,7 +53,7 @@ test('user and stack have same role, stack\'s permission has "read" scope', func
   var user, userRole, stack, stackPermission;
 
   Ember.run(function(){
-    user     = store.push('user', {id:'u1', roles:['r1']});
+    user     = store.push('user', {id:'u1', roles:['r1'], verified: true});
     userRole = store.push('role', {id:'r1'});
 
     stack    = store.push('stack', {id:'s1', permissions:['p1']});
@@ -81,7 +81,7 @@ test('user and stack do not have same role', function(){
   var user, userRole, stack, stackPermission, stackRole;
 
   Ember.run(function(){
-    user     = store.push('user', {id:'u1', roles:['r1']});
+    user     = store.push('user', {id:'u1', roles:['r1'], verified: true});
     userRole = store.push('role', {id:'r1'});
 
     stack    = store.push('stack', {id:'s1', permissions:['p1']});
@@ -111,8 +111,8 @@ test('user has privileged role in stack organization can manage stack', function
   let links = { organization: '123' };
 
   Ember.run(function(){
-    user     = store.push('user', {id: 'u1', roles: ['r1'] });
-    userRole = store.push('role', {id:'r1', privileged: true, links: links });
+    user     = store.push('user', {id: 'u1', roles: ['r1'], verified: true});
+    userRole = store.push('role', {id:'r1', privileged: true, links: links});
     otherRole = store.push('role', {id: 'r2', links: links});
 
     // stack permission has otherRole, not privileged userRole
@@ -142,7 +142,7 @@ test('user has privileged role in outside organization cannot manage stack', fun
   let outsideOrganizationUrl = '/organziation/321';
 
   Ember.run(function(){
-    user     = store.push('user', {id: 'u1', roles: ['r1'] });
+    user     = store.push('user', {id: 'u1', roles: ['r1'], verified: true});
     userRole = store.push('role', {id:'r1', privileged: true, links: organization });
     outsideRole = store.push('role', {id: 'r2', links: {organization: outsideOrganizationUrl }});
 
@@ -172,7 +172,7 @@ test('user has multiple roles, some match stack\'s role', function(){
       stackPermission;
 
   Ember.run(function(){
-    user      = store.push('user', {id:'u1', roles:['r1','r2']});
+    user      = store.push('user', {id:'u1', roles:['r1','r2'], verified: true});
     userRole1 = store.push('role', {id:'r1'});
     userRole2 = store.push('role', {id:'r2'});
 
@@ -205,7 +205,7 @@ test('stack has multiple permissions, some match user\'s role', function(){
       stackPermission2;
 
   Ember.run(function(){
-    user      = store.push('user', {id:'u1', roles:['r1']});
+    user      = store.push('user', {id:'u1', roles:['r1'], verified: true});
     userRole  = store.push('role', {id:'r1'});
 
     stack            = store.push('stack',      {id:'s1', permissions:['p1','p2']});
@@ -244,7 +244,7 @@ test('with manage permission scope, user can do anything', function(){
       stackPermission;
 
   Ember.run(function(){
-    user      = store.push('user', {id:'u1', roles:['r1']});
+    user      = store.push('user', {id:'u1', roles:['r1'], verified: true});
     userRole = store.push('role', {id:'r1'});
 
     stack           = store.push('stack',      {id:'s1', permissions:['p1']});
@@ -279,7 +279,7 @@ test('when permission data includes role links, do not fetch roles, just use der
       stackPermission;
 
   Ember.run(function(){
-    user      = store.push('user', {id:'u1', roles:['abc-DEF-123']});
+    user      = store.push('user', {id:'u1', roles:['abc-DEF-123'], verified: true});
     userRole = store.push('role', {id:'abc-DEF-123'});
 
     stack           = store.push('stack',      {id:'s1', permissions:['p1']});
@@ -314,6 +314,7 @@ test('#can fetches data when it is not in the store', function(){
 
     return this.success({
       id: 'u1',
+      verified: true,
       _links: {
         self: { href: '/users/u1' },
         roles: { href: '/users/u1/roles'}
@@ -378,7 +379,7 @@ test('when user has privileged organization role, user can manage organization',
   let done = assert.async();
   let user, roles = [], organization;
   Ember.run( () => {
-    user = store.push('user', {id: 'u1', roles: ['r1', 'r2']});
+    user = store.push('user', {id: 'u1', roles: ['r1', 'r2'], verified: true});
     roles.push( store.push('role', {id:'r1', organization: 'o1', links: {organization:'/organizations/o1'}}) );
     roles.push( store.push('role',
       {
@@ -396,5 +397,53 @@ test('when user has privileged organization role, user can manage organization',
     can(user, 'manage', organization).then( (result) => {
       assert.ok(result, 'user can manage organization');
     }).finally(done);
+  });
+});
+
+test('when user is not verified, can read', (assert) => {
+  var user, userRole, stack, stackPermission;
+
+  Ember.run(function(){
+    user     = store.push('user', {id:'u1', roles:['r1'], verified: false});
+    userRole = store.push('role', {id:'r1'});
+
+    stack    = store.push('stack', {id:'s1', permissions:['p1']});
+    stackPermission = store.push('permission', {
+      id:'p1',
+      scope:'manage',
+      links: {
+        role: '/roles/r1'
+      }
+    });
+  });
+
+  return Ember.run(function(){
+    return can(user, 'read', stack).then(function(res){
+      ok(res, 'user can read stack');
+    });
+  });
+});
+
+test('when user is not verified, cannot manage', (assert) => {
+  var user, userRole, stack, stackPermission;
+
+  Ember.run(function(){
+    user     = store.push('user', {id:'u1', roles:['r1'], verified: false});
+    userRole = store.push('role', {id:'r1'});
+
+    stack    = store.push('stack', {id:'s1', permissions:['p1']});
+    stackPermission = store.push('permission', {
+      id:'p1',
+      scope:'manage',
+      links: {
+        role: '/roles/r1'
+      }
+    });
+  });
+
+  return Ember.run(function(){
+    return can(user, 'manage', stack).then((res) => {
+      ok(!res, 'user cannot manage stack');
+    });
   });
 });
