@@ -99,8 +99,7 @@
       </div>
 
       <div class="role-members">
-        {{!FIXME this should be the role's users, not the organization's users }}
-        {{#each organization.users as |user|}}
+        {{#each model.users as |user|}}
           <div class="form-group">
             <label>{{user.name}}</label>
             <button {{action "removeUser" user}}>Remove</button>

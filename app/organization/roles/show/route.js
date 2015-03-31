@@ -26,10 +26,8 @@ export default Ember.Route.extend({
       this._stacks = stacks;
     }));
 
-    // Ensure the organization has users before entering route
     promises.push(this._organization.get('users'));
-
-    // load role invitations before entering route
+    promises.push(model.get('users'));
     promises.push(model.get('invitations'));
 
     return Ember.RSVP.all(promises);
