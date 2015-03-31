@@ -94,8 +94,8 @@
 
       <div class="form-group">
         <label>Invite by email</label>
-        {{input value=invitedEmail}}
-        <button {{action "inviteEmail" invitedEmail}}>Invite</button>
+        {{input name='invite-by-email' value=invitedEmail}}
+        <button {{action "inviteByEmail" invitedEmail}}>Invite</button>
       </div>
 
       <div class="role-members">

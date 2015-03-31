@@ -72,6 +72,14 @@ export default Ember.Route.extend({
         return membership.destroyRecord();
       });
     },
+    inviteByEmail(email){
+      let role = this.currentModel;
+      let invitation = this.store.createRecord('invitation', {
+        email,
+        role
+      });
+      invitation.save();
+    },
     removeInvitation(invitation){
       invitation.destroyRecord();
     },

@@ -289,7 +289,7 @@ test(`visiting ${url} allows removing a user`, (assert) => {
   });
 });
 
-test(`visiting ${url} shows list of invitations to this role`, (assert) => {
+test(`visiting ${url} shows invitation UI`, (assert) => {
   const invitations = [{
     id: 'invite1',
     email: 'user1@gmail.com'
@@ -308,6 +308,10 @@ test(`visiting ${url} shows list of invitations to this role`, (assert) => {
 
   visit(url);
   andThen(() => {
+    expectInput('invite-by-email');
+    expectButton('Invite');
+
+    // lists invitations, with resend/remove buttons
     let invitationsDiv = findWithAssert('.role-invitations');
     invitations.forEach((invite, index) => {
       assert.ok(invitationsDiv.find(`:contains(${invite.email})`).length,
@@ -320,6 +324,23 @@ test(`visiting ${url} shows list of invitations to this role`, (assert) => {
                 `has invitation remove button for item @ index ${index}`);
     });
   });
+});
+
+// FIXME test creating an invitation
+test(`visiting ${url} allows inviting a user by email`, (assert) => {
+  assert.expect(1);
+
+  const email = 'abc@gmail.com';
+
+  stubRequest('post', `/roles/${roleId}/invitations`, function(request){
+    assert.equal(this.json(request).email, email, 'creates invite with email');
+    return this.noContent();
+  });
+
+  doSetup();
+  visit(url);
+  fillInput('invite-by-email', email);
+  clickButton('Invite');
 });
 
 test(`visiting ${url} allows removing an invitation`, (assert) => {
