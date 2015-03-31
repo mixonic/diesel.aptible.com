@@ -88,7 +88,7 @@
     <form role='form'>
       <div class="form-group">
         <label>Add member</label>
-        {{user-select users=organization.users selected=invitedUser}}
+        {{user-select users=nonmembers selected=invitedUser}}
         <button {{action "inviteUser" invitedUser}}>Add</button>
       </div>
 

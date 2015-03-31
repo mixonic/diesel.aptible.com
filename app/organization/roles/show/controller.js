@@ -17,5 +17,13 @@ export default Ember.Controller.extend({
 
       this.set('_changesetIsChanged', hasChanged);
     });
-  }
+  },
+
+  nonmembers: function(){
+    const members = this.get('model.users');
+    const organizationUsers = this.get('organization.users');
+    return organizationUsers.reject((user) => {
+      return members.contains(user);
+    });
+  }.property('model.users.[]', 'organization.users.[]'),
 });

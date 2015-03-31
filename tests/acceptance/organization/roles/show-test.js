@@ -235,7 +235,7 @@ test(`visiting ${url} shows list of members`, (assert) => {
         users: { href: apiRoleUsersUrl }
       }
     },
-    user: orgUsers
+    users: orgUsers
   });
 
   stubRequest('get', apiRoleUsersUrl, function(request){
@@ -246,9 +246,14 @@ test(`visiting ${url} shows list of members`, (assert) => {
   andThen(() => {
     let membersDiv = findWithAssert('.role-members');
     assert.ok(membersDiv.find(`:contains(${memberUser.name})`).length,
-              `has div with user name "${memberUser.name}"`);
+              `member list has div with user name "${memberUser.name}"`);
     assert.ok(!membersDiv.find(`:contains(${orgUser.name})`).length,
-              `does not have div with user name "${orgUser.name}"`);
+              `member list does not have div with user name "${orgUser.name}"`);
+    let nonmemberSelect = findWithAssert('.user-select');
+    assert.ok(nonmemberSelect.find(`:contains(${orgUser.name})`).length,
+              `nonmember select has option with user name "${orgUser.name}"`);
+    assert.ok(!nonmemberSelect.find(`:contains(${memberUser.name})`).length,
+              `nonmember select does not have option with user name "${memberUser.name}"`);
   });
 });
 
@@ -294,6 +299,10 @@ test(`visiting ${url} allows removing a user`, (assert) => {
   // returns a list of users
   stubRequest('get', apiUsersUrl, function(request){
     return this.success({ _embedded: {users} });
+  });
+
+  stubRequest('get', apiRoleUrl, function(request){
+    return this.success(roleData);
   });
 
   stubRequest('delete', `/memberships/${memberships[0].id}`, function(request){

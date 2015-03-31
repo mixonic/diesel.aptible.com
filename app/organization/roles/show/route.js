@@ -70,6 +70,8 @@ export default Ember.Route.extend({
       role.get('memberships').then((memberships) => {
         let membership = memberships.findBy('data.links.user', userLink);
         return membership.destroyRecord();
+      }).then(() => {
+        return this.currentModel.reload();
       });
     },
     inviteByEmail(email){
@@ -124,4 +126,3 @@ export default Ember.Route.extend({
     }
   }
 });
-
