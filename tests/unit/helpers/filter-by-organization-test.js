@@ -2,6 +2,7 @@ import {
   filterByOrganization
 } from '../../../helpers/filter-by-organization';
 import { module, test } from 'qunit';
+import Ember from "ember";
 
 module('FilterByOrganizationHelper');
 

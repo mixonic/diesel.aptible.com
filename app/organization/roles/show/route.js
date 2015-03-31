@@ -63,6 +63,17 @@ export default Ember.Route.extend({
     controller.observeChangeset();
   },
   actions: {
+    inviteUser(user){
+      const role = this.currentModel;
+      const userLink = user.get('data.links.self');
+      const membership = this.store.createRecord('membership', {
+        role,
+        userUrl: userLink
+      });
+      membership.save().then(() => {
+        return this.currentModel.get('users').reload();
+      });
+    },
     removeUser(user){
       let role = this.currentModel;
       let userLink = user.get('data.links.self');
@@ -71,7 +82,7 @@ export default Ember.Route.extend({
         let membership = memberships.findBy('data.links.user', userLink);
         return membership.destroyRecord();
       }).then(() => {
-        return this.currentModel.reload();
+        return this.currentModel.get('users').reload();
       });
     },
     inviteByEmail(email){
