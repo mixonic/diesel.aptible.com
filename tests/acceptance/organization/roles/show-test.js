@@ -12,6 +12,7 @@ let roleId = 'r1';
 let roleName = 'the-role';
 let url = `/organizations/${orgId}/roles/${roleId}`;
 let apiRoleUrl = `/roles/${roleId}`;
+let apiRoleUsersUrl = `/roles/${roleId}/users`;
 let apiUsersUrl = `/organizations/${orgId}/users`;
 
 module('Acceptance: Organizations: Roles Show', {
@@ -211,35 +212,46 @@ test(`visiting ${url} saves changed name and privileged values`, (assert)=> {
 
 });
 
-// FIXME need to ensure we are listing members of this role,
-// not users in this organization
 test(`visiting ${url} shows list of members`, (assert) => {
-  doSetup();
 
-  const users = [{
+  const memberUser = {
     id: 'org-user-1',
     name: 'bob'
-  }, {
+  };
+  const orgUser = {
     id: 'org-user-2',
     name: 'mr anderson'
-  }];
+  };
+  const orgUsers = [
+    memberUser,
+    orgUser
+  ];
 
-  stubRequest('get', apiOrgUsersUrl, function(request){
-    return this.success({ _embedded: {users} });
+  doSetup({
+    roleData: {
+      id: roleId,
+      name: roleName,
+      _links: {
+        users: { href: apiRoleUsersUrl }
+      }
+    },
+    user: orgUsers
+  });
+
+  stubRequest('get', apiRoleUsersUrl, function(request){
+    return this.success({ _embedded: {users: [memberUser]} });
   });
 
   visit(url);
   andThen(() => {
     let membersDiv = findWithAssert('.role-members');
-    users.forEach((u) => {
-      assert.ok(membersDiv.find(`:contains(${u.name})`).length,
-                `has div with user name "${u.name}"`);
-    });
+    assert.ok(membersDiv.find(`:contains(${memberUser.name})`).length,
+              `has div with user name "${memberUser.name}"`);
+    assert.ok(!membersDiv.find(`:contains(${orgUser.name})`).length,
+              `does not have div with user name "${orgUser.name}"`);
   });
 });
 
-// FIXME need to ensure we are listing members of this role,
-// not users in this organization
 test(`visiting ${url} allows removing a user`, (assert) => {
   assert.expect(1);
 
@@ -247,7 +259,10 @@ test(`visiting ${url} allows removing a user`, (assert) => {
   let roleData = {
     id: roleId,
     name: roleName,
-    _links: { memberships: { href: apiRoleMembersUrl } }
+    _links: {
+      memberships: { href: apiRoleMembersUrl },
+      users: { href: apiRoleUsersUrl }
+    }
   };
 
   doSetup({roleData});
@@ -270,6 +285,10 @@ test(`visiting ${url} allows removing a user`, (assert) => {
 
   stubRequest('get', apiRoleMembersUrl, function(request){
     return this.success({ _embedded: {memberships} });
+  });
+
+  stubRequest('get', apiRoleUsersUrl, function(request){
+    return this.success({ _embedded: {users} });
   });
 
   // returns a list of users
@@ -396,4 +415,3 @@ test(`visiting ${url} allows resending an invitation`, (assert) => {
   visit(url);
   click(`.role-invitations button:contains(Resend Invitation):eq(0)`);
 });
-
